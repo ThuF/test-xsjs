@@ -46,3 +46,17 @@ jobs:
           docker build . -t ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
 
+      - name: Create Release
+        if: "${{ github.event.inputs.releaseType }} == Image + Release Notes || ${{ github.event.inputs.releaseType }} == Image + Release Notes + Kyma Update"
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.applicationReleaseVersion }}
+          release_name: ${{ github.event.inputs.applicationReleaseVersion }}
+          draft: false
+          prerelease: false
+          body: |
+            ## Application Image - ${{ github.event.inputs.applicationReleaseVersion }}
+            #### Docker images:
+              - [${{ github.event.inputs.applicationRepository }}](https://hub.docker.com/r/${{ github.event.inputs.applicationRepository }}/tags?page=1&ordering=last_updated) - Application Image
