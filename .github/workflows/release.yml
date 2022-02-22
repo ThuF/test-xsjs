@@ -24,8 +24,7 @@ jobs:
         run: |
           BASEIMAGE=${{ github.event.inputs.xskVersion }}
           REGISTRY_PATH=/usr/local/tomcat/target/dirigible/repository/root/registry/public/
-          DOCKERREF=${{secrets.DOCKER_REGISTRY}}/${{ github.event.inputs.applicationReleaseVersion }}
 
-          echo -e "FROM $BASEIMAGE\nADD . $REGISTRY_PATH" | docker build . -f - -t $DOCKERREF
-          docker push $DOCKERREF
+          echo -e "FROM $BASEIMAGE\nADD . $REGISTRY_PATH" | docker build . -f - -t ${{ github.event.inputs.applicationReleaseVersion }}
+          docker push ${{ github.event.inputs.applicationReleaseVersion }}
 
