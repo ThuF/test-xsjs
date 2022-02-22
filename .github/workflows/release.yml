@@ -20,11 +20,16 @@ jobs:
           fetch-depth: 0
       - name: Docker Login
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}} ${{secrets.DOCKER_REGISTRY}}
+      - name: Build Dockerfile
+        run: |
+          DOCKERFILE_CONTENT=$(cat << EOF
+          FROM ${{ github.event.inputs.xskVersion }}
+          ADD . /usr/local/tomcat/target/dirigible/repository/root/registry/public/
+          EOF
+          )
+          echo "$DOCKERFILE_CONTENT" >> Dockerfile
       - name: Build image with XSK
         run: |
-          BASEIMAGE=${{ github.event.inputs.xskVersion }}
-          REGISTRY_PATH=/usr/local/tomcat/target/dirigible/repository/root/registry/public/
-
-          echo -e "FROM $BASEIMAGE\nADD . $REGISTRY_PATH" | docker build . -f - -t ${{ github.event.inputs.applicationReleaseVersion }}
+          docker build . -t ${{ github.event.inputs.applicationReleaseVersion }}
           docker push ${{ github.event.inputs.applicationReleaseVersion }}
 
