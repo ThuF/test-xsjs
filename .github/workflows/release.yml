@@ -8,9 +8,9 @@ on:
         required: true
         description: Release Type
         options: 
-        - Image Only
-        - Image + Release Notes
-        - Image + Release Notes + Kyma Update
+        - image
+        - image-release-notes
+        - image-release-notes-kyma-update
       xskVersion:
         description: XSK Version
         required: true
@@ -52,7 +52,7 @@ jobs:
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
 
       - name: Create Release
-        if: ${{ github.event.inputs.releaseType == 'Image + Release Notes'}} || ${{ github.event.inputs.releaseType == 'Image + Release Notes + Kyma Update'}}
+        if: ${{ github.event.inputs.releaseType == 'image-release-notes'}} || ${{ github.event.inputs.releaseType == 'image-release-notes-kyma-update'}}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
