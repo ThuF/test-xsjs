@@ -22,9 +22,11 @@ on:
       applicationReleaseVersion:
         description: Application Release Version
         required: true
+      kymaAccessToken:
+        description: Kyma Access Token
 
 jobs:
-  info:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Release Input Parameters
@@ -32,10 +34,6 @@ jobs:
           echo "Release Type: ${{ github.event.inputs.releaseType }}"
           echo "Application Repository: ${{ github.event.inputs.applicationRepository }}"
           echo "Application Release Version: ${{ github.event.inputs.applicationReleaseVersion }}"
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -53,7 +51,9 @@ jobs:
       - name: Build Application Image
         run: |
           docker build . -t ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
+          docker tag ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }} ${{ github.event.inputs.applicationRepository }}:latest
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
+          docker push ${{ github.event.inputs.applicationRepository }}:latest
       - name: Create Release
         if: "${{ github.event.inputs.releaseType == 'image-release-notes'}}"
         uses: actions/create-release@v1
@@ -68,3 +68,25 @@ jobs:
             ## Application Image - ${{ github.event.inputs.applicationReleaseVersion }}
             #### Docker images:
               - [${{ github.event.inputs.applicationRepository }}](https://hub.docker.com/r/${{ github.event.inputs.applicationRepository }}/tags?page=1&ordering=last_updated) - Application Image
+
+      #------------------Update Application Instance-------------------#
+
+      - name: Kubectl tool installer
+        uses: Azure/setup-kubectl@v1
+      - uses: azure/setup-helm@v1
+        with:
+          version: 'latest' # default is latest stable
+      - name: Add XSK helm repo
+        run: |
+          helm repo add xsk https://www.xsk.io
+          helm repo update
+      - name: Setup Kube Config File
+        run: |
+          mkdir $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" >> $HOME/.kube/config
+          find $HOME/.kube/config -type f -exec sed -i ''s/#{AccessToken}#/${{ github.event.inputs.kymaAccessToken }}/g'' {} \;
+      - name: Update XSK Instance
+        run: helm upgrade --install xsk xsk/xsk \
+          --set kyma.enabled=true \
+          --set kyma.host=${{ secrets.KYMA_HOST }} \
+          --set application.image=${{ github.event.inputs.applicationReleaseVersion }}:${{ github.event.inputs.applicationReleaseVersion }}
