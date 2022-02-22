@@ -27,6 +27,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Release Input Parameters
+        run: |
+          echo "Release Type: ${{ github.event.inputs.releaseType }}"
+          echo "Application Repository: ${{ github.event.inputs.applicationRepository }}"
+          echo "Application Release Version: ${{ github.event.inputs.applicationReleaseVersion }}"
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -47,7 +52,7 @@ jobs:
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
 
       - name: Create Release
-        if: "${{ github.event.inputs.releaseType }} == Image + Release Notes || ${{ github.event.inputs.releaseType }} == Image + Release Notes + Kyma Update"
+        if: "${{ github.event.inputs.releaseType }} == 'Image + Release Notes' || ${{ github.event.inputs.releaseType }} == 'Image + Release Notes + Kyma Update'"
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
