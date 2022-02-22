@@ -3,10 +3,22 @@ name: Release Docker Image
 on:
   workflow_dispatch:
     inputs:
+      releaseType:
+        type: choice
+        required: true
+        description: Release Type
+        options: 
+        - Image Only
+        - Image + Release Notes
+        - Image + Release Notes + Kyma Update
       xskVersion:
         description: XSK Version
         required: true
         default: 'dirigiblelabs/xsk-kyma:latest'
+      applicationRepository:
+        description: Application Repository
+        required: true
+        default: 'thuf/test-xsjs'
       applicationReleaseVersion:
         description: Application Release Version
         required: true
@@ -18,8 +30,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Docker Login
-        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}} ${{secrets.DOCKER_REGISTRY}}
       - name: Build Dockerfile
         run: |
           DOCKERFILE_CONTENT=$(cat << EOF
@@ -28,8 +38,11 @@ jobs:
           EOF
           )
           echo "$DOCKERFILE_CONTENT" >> Dockerfile
-      - name: Build image with XSK
+          echo "$DOCKERFILE_CONTENT"
+      - name: Docker Login
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}} ${{secrets.DOCKER_REGISTRY}}
+      - name: Build Application Image
         run: |
-          docker build . -t ${{ github.event.inputs.applicationReleaseVersion }}
-          docker push ${{ github.event.inputs.applicationReleaseVersion }}
+          docker build . -t ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
+          docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
 
