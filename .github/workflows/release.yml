@@ -54,15 +54,8 @@ jobs:
         run: |
           docker build . -t ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
-
-  release-notes:
-    if: ${{ github.event.inputs.releaseType == 'image-release-notes'}} || ${{ github.event.inputs.releaseType == 'image-release-notes-kyma-update'}}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: Create Release
+        if: "${{ github.event.inputs.releaseType == 'image-release-notes'}}"
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
