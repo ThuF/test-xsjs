@@ -14,7 +14,11 @@ on:
       xskRepository:
         description: XSK Repository
         required: true
-        default: 'dirigiblelabs/xsk-kyma'
+        type: choice
+        options: 
+        - 'dirigiblelabs/xsk-kyma'
+        - 'dirigiblelabs/xsk-cf'
+        - 'dirigiblelabs/xsk'
       xskVersion:
         description: XSK Version
         required: true
@@ -95,4 +99,4 @@ jobs:
           helm upgrade --install xsk xsk/xsk \
           --set kyma.enabled=true \
           --set kyma.host=${{ secrets.KYMA_HOST }} \
-          --set application.image=${{ github.event.inputs.applicationReleaseVersion }}:${{ github.event.inputs.applicationReleaseVersion }}
+          --set application.image=${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
