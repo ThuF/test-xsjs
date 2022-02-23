@@ -51,6 +51,8 @@ jobs:
           FROM ${{ github.event.inputs.xskRepository }}:${{ github.event.inputs.xskVersion }}
           RUN mkdir -p /usr/local/tomcat/target/dirigible/repository/root/registry/public/
           COPY . /usr/local/tomcat/target/dirigible/repository/root/registry/public/
+          RUN rm -rf /usr/local/tomcat/target/dirigible/repository/root/registry/public/Dockerfile
+          RUN rm -rf /usr/local/tomcat/target/dirigible/repository/root/registry/public/.github/
           EOF
           )
           echo "$DOCKERFILE_CONTENT" >> Dockerfile
