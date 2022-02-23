@@ -9,12 +9,16 @@ on:
         description: Release Type
         options: 
         - image
-        - image-release-notes
-        - image-release-notes-kyma-update
+        - image-release
+        - image-release-deploy
+      xskRepository:
+        description: XSK Repository
+        required: true
+        default: 'dirigiblelabs/xsk-kyma'
       xskVersion:
         description: XSK Version
         required: true
-        default: 'dirigiblelabs/xsk-kyma:latest'
+        default: 'latest'
       applicationRepository:
         description: Application Repository
         required: true
@@ -40,7 +44,7 @@ jobs:
       - name: Build Dockerfile
         run: |
           DOCKERFILE_CONTENT=$(cat << EOF
-          FROM ${{ github.event.inputs.xskVersion }}
+          FROM ${{ github.event.inputs.xskRepository }}:${{ github.event.inputs.xskVersion }}
           ADD . /usr/local/tomcat/target/dirigible/repository/root/registry/public/
           EOF
           )
@@ -54,8 +58,14 @@ jobs:
           docker tag ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }} ${{ github.event.inputs.applicationRepository }}:latest
           docker push ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
           docker push ${{ github.event.inputs.applicationRepository }}:latest
+
+  release:
+    if: "${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
       - name: Create Release
-        if: "${{ github.event.inputs.releaseType == 'image-release-notes'}}"
+        if: "${{ github.event.inputs.releaseType == 'image-release'}} || ${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -69,24 +79,21 @@ jobs:
             #### Docker images:
               - [${{ github.event.inputs.applicationRepository }}](https://hub.docker.com/r/${{ github.event.inputs.applicationRepository }}/tags?page=1&ordering=last_updated) - Application Image
 
-      #------------------Update Application Instance-------------------#
-
-      - name: Kubectl tool installer
-        uses: Azure/setup-kubectl@v1
-      - uses: azure/setup-helm@v1
-        with:
-          version: 'latest' # default is latest stable
-      - name: Add XSK helm repo
-        run: |
-          helm repo add xsk https://www.xsk.io
-          helm repo update
+  deploy:
+    if: "${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    steps:
       - name: Setup Kube Config File
         run: |
           mkdir $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" >> $HOME/.kube/config
           find $HOME/.kube/config -type f -exec sed -i ''s/#{AccessToken}#/${{ github.event.inputs.kymaAccessToken }}/g'' {} \;
-      - name: Update XSK Instance
-        run: helm upgrade --install xsk xsk/xsk \
+      - name: Helm Upgrade Application Instance
+        run: |
+          helm repo add xsk https://www.xsk.io
+          helm repo update
+          helm upgrade --install xsk xsk/xsk \
           --set kyma.enabled=true \
           --set kyma.host=${{ secrets.KYMA_HOST }} \
           --set application.image=${{ github.event.inputs.applicationReleaseVersion }}:${{ github.event.inputs.applicationReleaseVersion }}
