@@ -60,12 +60,11 @@ jobs:
           docker push ${{ github.event.inputs.applicationRepository }}:latest
 
   release:
-    if: "${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
+    if: "${{ github.event.inputs.releaseType == 'image-release'}} || ${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
     needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Create Release
-        if: "${{ github.event.inputs.releaseType == 'image-release' || github.event.inputs.releaseType == 'image-release-deploy'}}"
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
