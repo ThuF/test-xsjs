@@ -49,8 +49,8 @@ jobs:
         run: |
           DOCKERFILE_CONTENT=$(cat << EOF
           FROM ${{ github.event.inputs.xskRepository }}:${{ github.event.inputs.xskVersion }}
-          RUN mkdir -p $CATALINA_HOME/target/dirigible/repository/root/registry/public/
-          COPY . $CATALINA_HOME/target/dirigible/repository/root/registry/public/
+          RUN mkdir -p /usr/local/tomcat/target/dirigible/repository/root/registry/public/
+          COPY . /usr/local/tomcat/target/dirigible/repository/root/registry/public/
           EOF
           )
           echo "$DOCKERFILE_CONTENT" >> Dockerfile
