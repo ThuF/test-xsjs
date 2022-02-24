@@ -1,3 +1,3 @@
 $.response.setBody(JSON.stringify({
-    "message": "Hello World from GitHub Actions, XSK & Eclipse Dirigible!"
+    "message": "Hello World from GitHub Actions, XSK & Eclipse Dirigible!!!"
 }));
