@@ -102,4 +102,9 @@ jobs:
           helm upgrade --install xsk xsk/xsk \
           --set kyma.enabled=true \
           --set kyma.host=${{ secrets.KYMA_HOST }} \
+          --set hana.enabled=true \
+          --set hana.url=${{ secrets.HANA_URL }} \
+          --set hana.username=${{ secrets.HANA_USERNAME }} \
+          --set hana.password=${{ secrets.HANA_PASSWORD }} \
+          --set persistentVolumeClaim.enabled=false \
           --set application.image=${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
