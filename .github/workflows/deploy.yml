@@ -1,0 +1,40 @@
+name: Deploy Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      applicationRepository:
+        description: Application Repository
+        required: true
+        default: 'thuf/test-xsjs'
+      applicationReleaseVersion:
+        description: Application Release Version
+        required: true
+      kymaAccessToken:
+        description: Kyma Access Token
+
+jobs:
+  deploy:
+    if: "${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Kube Config File
+        run: |
+          mkdir $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" >> $HOME/.kube/config
+          find $HOME/.kube/config -type f -exec sed -i ''s/#{AccessToken}#/${{ github.event.inputs.kymaAccessToken }}/g'' {} \;
+      - name: Helm Upgrade Application Instance
+        run: |
+          helm repo add xsk https://www.xsk.io
+          helm repo update
+          helm upgrade --install xsk xsk/xsk \
+          --set kyma.enabled=true \
+          --set kyma.host=${{ secrets.KYMA_HOST }} \
+          --set hana.enabled=true \
+          --set hana.url='${{ secrets.HANA_URL }}' \
+          --set hana.username=${{ secrets.HANA_USERNAME }} \
+          --set hana.password='${{ secrets.HANA_PASSWORD }}' \
+          --set persistentVolumeClaim.enabled=false \
+          --set deployment.strategyType=RollingUpdate \
+          --set application.image=${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
