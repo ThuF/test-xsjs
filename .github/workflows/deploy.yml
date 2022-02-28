@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Kube Config File
+        env:
+          KYMA_CERTIFICATE: ${{ secrets.KYMA_CERTIFICATE }}
+          KYMA_SERVER: ${{ secrets.KYMA_SERVER }}
+          KYMA_TOKEN: ${{ secrets.KYMA_TOKEN }}
         run: |
           mkdir $HOME/.kube
           echo "
