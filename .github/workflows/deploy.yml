@@ -36,6 +36,7 @@ jobs:
           - name: xsk
             user:
               token: $KYMA_TOKEN" > $HOME/.kube/config
+          cat $HOME/.kube/config
       - name: Export Kyma Host
         run: |
           export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
