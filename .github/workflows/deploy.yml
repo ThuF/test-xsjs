@@ -42,6 +42,7 @@ jobs:
           )
           echo KUBE_CONFIG >> $HOME/.kube/config
           echo KUBE_CONFIG
+          echo ${$KYMA_SERVER:12}
       - name: Helm Upgrade Application Instance
         run: |
           helm repo add xsk https://www.xsk.io
