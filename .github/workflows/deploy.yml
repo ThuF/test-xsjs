@@ -19,14 +19,15 @@ jobs:
         run: |
           mkdir $HOME/.kube
           echo "${{ secrets.KYMA_CONFIG }}" >> $HOME/.kube/config
-          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_CERTIFICATE}#/${{ secrets.KYMA_CERTIFICATE }}/g'' {} \;
-          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_SERVER}#/${{ secrets.KYMA_SERVER }}/g'' {} \;
-          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_TOKEN}#/${{ secrets.KYMA_TOKEN }}/g'' {} \;
+          # find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_CERTIFICATE}#/${{ secrets.KYMA_CERTIFICATE }}/g'' {} \;
+          # find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_SERVER}#/${{ secrets.KYMA_SERVER }}/g'' {} \;
+          # find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_TOKEN}#/${{ secrets.KYMA_TOKEN }}/g'' {} \;
+      - name: Export Kyma Host
+        run: |
           export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
           echo "KYMA_HOST=${KYMA_API_SERVER:12}" >> $GITHUB_ENV
       - name: Helm Upgrade Application Instance
         run: |
-          export KUBECONFIG=$HOME/.kube/config
           helm repo add xsk https://www.xsk.io
           helm repo update
           helm upgrade --install xsk xsk/xsk \
