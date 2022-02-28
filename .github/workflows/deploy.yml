@@ -19,9 +19,6 @@ jobs:
         run: |
           mkdir $HOME/.kube
           echo "${{ secrets.KYMA_CONFIG }}" >> $HOME/.kube/config
-          # find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_CERTIFICATE}#/${{ secrets.KYMA_CERTIFICATE }}/g'' {} \;
-          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_SERVER}#/${{ secrets.KYMA_SERVER }}/g'' {} \;
-          # find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_TOKEN}#/${{ secrets.KYMA_TOKEN }}/g'' {} \;
       - name: Export Kyma Host
         run: |
           export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
