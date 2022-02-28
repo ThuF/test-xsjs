@@ -82,8 +82,8 @@ jobs:
           prerelease: false
           body: |
             ## Application Image - ${{ github.event.inputs.applicationReleaseVersion }}
-            #### Docker images:
-              - [${{ github.event.inputs.applicationRepository }}](https://hub.docker.com/r/${{ github.event.inputs.applicationRepository }}/tags?page=1&ordering=last_updated) - Application Image
+            #### Released Image:
+              - ${{ github.event.inputs.applicationRepository }}:${{ github.event.inputs.applicationReleaseVersion }}
 
   deploy:
     if: "${{ github.event.inputs.releaseType == 'image-release-deploy'}}"
