@@ -10,8 +10,6 @@ on:
       applicationReleaseVersion:
         description: Application Release Version
         required: true
-      kymaAccessToken:
-        description: Kyma Access Token
 
 jobs:
   deploy:
@@ -27,8 +25,8 @@ jobs:
           clusters:
           - name: xsk
             cluster:
-              certificate-authority-data: $KYMA_CERTIFICATE
-              server: $KYMA_SERVER
+              certificate-authority-data: ${{ secrets.KYMA_CERTIFICATE }}
+              server: ${{ secrets.KYMA_SERVER }}
           contexts:
           - name: xsk
             context:
@@ -37,12 +35,14 @@ jobs:
           users:
           - name: xsk
             user:
-              token: $KYMA_TOKEN
+              token: ${{ secrets.KYMA_TOKEN }}
           EOF
           )
-          echo KUBE_CONFIG >> $HOME/.kube/config
-          echo KUBE_CONFIG
-          echo ${$KYMA_SERVER:12}
+          echo $KUBE_CONFIG >> $HOME/.kube/config
+          echo $KUBE_CONFIG
+          export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
+          echo "KYMA_HOST=${KYMA_API_SERVER:12}" >> $GITHUB_ENV
+          echo $KYMA_HOST
       - name: Helm Upgrade Application Instance
         run: |
           helm repo add xsk https://www.xsk.io
