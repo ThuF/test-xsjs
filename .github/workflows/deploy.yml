@@ -19,12 +19,14 @@ jobs:
         run: |
           mkdir $HOME/.kube
           echo "${{ secrets.KYMA_CONFIG }}" >> $HOME/.kube/config
+          echo "TEST=${{ secrets.KYMA_CONFIG }}" >> $GITHUB_ENV
       - name: Export Kyma Host
         run: |
           export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
           echo "KYMA_HOST=${KYMA_API_SERVER:12}" >> $GITHUB_ENV
       - name: Helm Upgrade Application Instance
         run: |
+          echo $TEST
           helm repo add xsk https://www.xsk.io
           helm repo update
           helm upgrade --install xsk xsk/xsk \
