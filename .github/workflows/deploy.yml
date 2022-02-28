@@ -20,8 +20,28 @@ jobs:
       - name: Setup Kube Config File
         run: |
           mkdir $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" >> $HOME/.kube/config
-          find $HOME/.kube/config -type f -exec sed -i ''s/#{AccessToken}#/${{ github.event.inputs.kymaAccessToken }}/g'' {} \;
+          KUBE_CONFIG=$(cat << EOF
+          apiVersion: v1
+          kind: Config
+          current-context: xsk
+          clusters:
+          - name: xsk
+            cluster:
+              certificate-authority-data: $KYMA_CERTIFICATE
+              server: $KYMA_SERVER
+          contexts:
+          - name: xsk
+            context:
+              cluster: xsk
+              user: xsk
+          users:
+          - name: xsk
+            user:
+              token: $KYMA_TOKEN
+          EOF
+          )
+          echo KUBE_CONFIG >> $HOME/.kube/config
+          echo KUBE_CONFIG
       - name: Helm Upgrade Application Instance
         run: |
           helm repo add xsk https://www.xsk.io
