@@ -18,28 +18,11 @@ jobs:
       - name: Setup Kube Config File
         run: |
           mkdir $HOME/.kube
-          KUBE_CONFIG=$(cat << EOF
-          apiVersion: v1
-          kind: Config
-          current-context: xsk
-          clusters:
-          - name: xsk
-            cluster:
-              certificate-authority-data: ${{ secrets.KYMA_CERTIFICATE }}
-              server: ${{ secrets.KYMA_SERVER }}
-          contexts:
-          - name: xsk
-            context:
-              cluster: xsk
-              user: xsk
-          users:
-          - name: xsk
-            user:
-              token: ${{ secrets.KYMA_TOKEN }}
-          EOF
-          )
-          echo $KUBE_CONFIG >> $HOME/.kube/config
-          echo $KUBE_CONFIG
+          echo "${{ secrets.KYMA_CONFIG }}" >> $HOME/.kube/config
+          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_CERTIFICATE}#/${{ secrets.KYMA_CERTIFICATE }}/g'' {} \;
+          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_SERVER}#/${{ secrets.KYMA_SERVER }}/g'' {} \;
+          find $HOME/.kube/config -type f -exec sed -i ''s/#{KYMA_TOKEN}#/${{ secrets.KYMA_TOKEN }}/g'' {} \;
+          cat $HOME/.kube/config
           export KYMA_API_SERVER=${{ secrets.KYMA_SERVER }}
           echo "KYMA_HOST=${KYMA_API_SERVER:12}" >> $GITHUB_ENV
           echo $KYMA_HOST
